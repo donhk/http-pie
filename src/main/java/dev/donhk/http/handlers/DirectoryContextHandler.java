@@ -33,14 +33,18 @@ public class DirectoryContextHandler extends AbstractHandler {
         sb.append("<body>");
         Files.list(directory).forEach(element -> {
             final String name = element.toString().replace(webDirectory.toString(), "").replace("\\", "/");
-            if (Files.isSymbolicLink(element)) {
-                sb.append("[S]").append(wrap(name, exchange)).append(newLineHtml);
-            }
-            if (Files.isDirectory(element)) {
-                sb.append("[D]").append(wrap(name, exchange)).append(newLineHtml);
-            }
-            if (Files.isRegularFile(element)) {
-                sb.append("[F]").append(wrap(name, exchange)).append(newLineHtml);
+            try {
+                if (Files.isSymbolicLink(element)) {
+                    sb.append("[S]").append(wrap(name, exchange)).append(" ").append(Files.size(element)).append(" bytes").append(newLineHtml);
+                }
+                if (Files.isDirectory(element)) {
+                    sb.append("[D]").append(wrap(name, exchange)).append(" ").append(Files.size(element)).append(" bytes").append(newLineHtml);
+                }
+                if (Files.isRegularFile(element)) {
+                    sb.append("[F]").append(wrap(name, exchange)).append(" ").append(Files.size(element)).append(" bytes").append(newLineHtml);
+                }
+            } catch (IOException io) {
+                io.printStackTrace();
             }
         });
         sb.append("</body>");

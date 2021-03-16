@@ -20,16 +20,25 @@ public class FileContextHandler extends AbstractHandler {
         System.out.println("Downloading " + file.toString());
         addCommonHeaders(exchange);
         exchange.getResponseHeaders().put("Content-Transfer-Encoding", Collections.singletonList("binary"));
-        exchange.sendResponseHeaders(200, Files.size(file));
+        final long totalBytes = Files.size(file);
+        exchange.sendResponseHeaders(200, totalBytes);
         try (OutputStream outputStream = exchange.getResponseBody();
-             FileInputStream fis = new FileInputStream(file.toFile())) {
+             InputStream is = new FileInputStream(file.toFile())) {
             //10MB
-            final int bufferSize = 10_485_760;
+            long bytesLeft = totalBytes;
+            final int bufferSize = 8192;
             final byte[] buffer = new byte[bufferSize];
-            while ((fis.read(buffer)) != -1) {
-                outputStream.write(buffer);
+            while (bytesLeft > 0) {
+                final int min = (int) Math.min(buffer.length, bytesLeft);
+                final int bytesRead = is.read(buffer, 0, min);
+                if (bytesRead < 0) {
+                    throw new EOFException("Expected " + bytesLeft + " more bytes to read");
+                }
+                outputStream.write(buffer, 0, bytesRead);
                 outputStream.flush();
+                bytesLeft -= bytesRead;
             }
         }
     }
+
 }

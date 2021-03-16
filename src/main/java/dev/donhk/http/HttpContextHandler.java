@@ -7,6 +7,7 @@ import dev.donhk.http.handlers.DirectoryContextHandler;
 import dev.donhk.http.handlers.FileContextHandler;
 
 import java.io.IOException;
+import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
@@ -30,7 +31,9 @@ public class HttpContextHandler implements Runnable, FileVisitor<Path> {
     public void run() {
         try {
             System.out.println("Starting server");
-            this.server = HttpServer.create(new InetSocketAddress("localhost", port), 0);
+            final String hostname = InetAddress.getLocalHost().getCanonicalHostName();
+            System.out.println("Starting socket at  " + hostname + ":" + port);
+            this.server = HttpServer.create(new InetSocketAddress(InetAddress.getLocalHost().getCanonicalHostName(), port), 0);
         } catch (IOException e) {
             throw new IllegalStateException(e.getMessage());
         }
