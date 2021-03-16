@@ -18,12 +18,22 @@ public class FileContextHandler extends AbstractHandler {
     @Override
     public void handle(HttpExchange exchange) throws IOException {
         System.out.println("Downloading " + file.toString());
-        addCommonHeaders(exchange);
+        Path realPath;
+        if (Files.isSymbolicLink(file)) {
+            realPath = file.toRealPath();
+        } else {
+            realPath = file;
+        }
+        downloadFile(exchange, realPath);
+    }
+
+    private void downloadFile(HttpExchange exchange, Path fileToDownload) throws IOException {
         exchange.getResponseHeaders().put("Content-Transfer-Encoding", Collections.singletonList("binary"));
-        final long totalBytes = Files.size(file);
+        addCommonHeaders(exchange);
+        final long totalBytes = Files.size(fileToDownload);
         exchange.sendResponseHeaders(200, totalBytes);
         try (OutputStream outputStream = exchange.getResponseBody();
-             InputStream is = new FileInputStream(file.toFile())) {
+             InputStream is = new FileInputStream(fileToDownload.toFile())) {
             //10MB
             long bytesLeft = totalBytes;
             final int bufferSize = 8192;
@@ -40,5 +50,4 @@ public class FileContextHandler extends AbstractHandler {
             }
         }
     }
-
 }

@@ -1,6 +1,7 @@
 package dev.donhk.http.handlers;
 
 import com.sun.net.httpserver.HttpExchange;
+import utils.Utils;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -24,36 +25,49 @@ public class DirectoryContextHandler extends AbstractHandler {
             exchange.close();
             return;
         }
-        final StringBuilder sb = new StringBuilder();
-        sb.append("<!DOCTYPE html>");
-        sb.append("<html>");
-        sb.append("<head>");
-        sb.append("<meta charset=\"UTF-8\">");
-        sb.append("</head>");
-        sb.append("<body>");
-        Files.list(directory).forEach(element -> {
-            final String name = element.toString().replace(webDirectory.toString(), "").replace("\\", "/");
+        final StringBuilder directories = new StringBuilder();
+        final StringBuilder files = new StringBuilder();
+
+        final String fileIcon = Utils.resource2txt("file.svg");
+        final String folderIcon = Utils.resource2txt("directory.svg");
+        String layout = Utils.resource2txt("layout.html");
+
+        Files.list(directory).sorted().forEach(element -> {
             try {
                 if (Files.isSymbolicLink(element)) {
-                    sb.append("[S]").append(wrap(name, exchange)).append(" ").append(Files.size(element)).append(" bytes").append(newLineHtml);
-                }
-                if (Files.isDirectory(element)) {
-                    sb.append("[D]").append(wrap(name, exchange)).append(" ").append(Files.size(element)).append(" bytes").append(newLineHtml);
-                }
-                if (Files.isRegularFile(element)) {
-                    sb.append("[F]").append(wrap(name, exchange)).append(" ").append(Files.size(element)).append(" bytes").append(newLineHtml);
+                    if (Files.isDirectory(element)) {
+                        directories.append(folderIcon).append(wrap(element)).append("@ ").append(Files.size(element)).append(" bytes").append(newLineHtml);
+                    }
+                    if (Files.isRegularFile(element)) {
+                        files.append(fileIcon).append(wrap(element)).append("@ ").append(Files.size(element)).append(" bytes").append(newLineHtml);
+                    }
+                } else {
+                    if (Files.isDirectory(element)) {
+                        directories.append(folderIcon).append(wrap(element)).append(" ").append(Files.size(element)).append(" bytes").append(newLineHtml);
+                    }
+                    if (Files.isRegularFile(element)) {
+                        files.append(fileIcon).append(wrap(element)).append(" ").append(Files.size(element)).append(" bytes").append(newLineHtml);
+                    }
                 }
             } catch (IOException io) {
                 io.printStackTrace();
             }
         });
-        sb.append("</body>");
-        sb.append("</html>");
-        final String responseMessage = sb.toString() + "\n";
+        directories.append(files);
+        final String responseMessage = layout.replace("{{listOfFiles}}", directories.toString()) + "\n";
         sendHtmlResponse(responseMessage.getBytes(), exchange);
     }
 
-    private String wrap(String name, HttpExchange exchange) {
-        return "<a href=\"" + name + "\">" + name + "</a>";
+    private String wrap(Path element) {
+        final String name = element.toString().replace(webDirectory.toString(), "").replace("\\", "/");
+        return "<a href=\"" + name + "\">" + "../" + element.getFileName() + "</a>";
+    }
+
+    private String fileIcon() {
+        return "<div class=\"fileIcon\"></div>";
+    }
+
+    private String folderIcon() {
+        return "<div class=\"directoryIcon\"></div>";
     }
 }

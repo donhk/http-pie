@@ -52,14 +52,8 @@ public class HttpContextHandler implements Runnable, FileVisitor<Path> {
     }
 
     @Override
-    public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException {
-        final Path xDir;
-        if (Files.isSymbolicLink(dir)) {
-            xDir = dir.toRealPath();
-        } else {
-            xDir = dir;
-        }
-        final String contextName = xDir.toString().replace(webDirectory.toString(), "").replace("\\", "/");
+    public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) {
+        final String contextName = dir.toString().replace(webDirectory.toString(), "").replace("\\", "/");
         final String context;
         if (contextName.length() == 0) {
             context = "/";
@@ -74,19 +68,13 @@ public class HttpContextHandler implements Runnable, FileVisitor<Path> {
     }
 
     @Override
-    public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException {
+    public FileVisitResult postVisitDirectory(Path dir, IOException exc) {
         return FileVisitResult.CONTINUE;
     }
 
     @Override
-    public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
-        final Path xFile;
-        if (Files.isSymbolicLink(file)) {
-            xFile = file.toRealPath();
-        } else {
-            xFile = file;
-        }
-        final String contextName = xFile.toString().replace(webDirectory.toString(), "").replace("\\", "/");
+    public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) {
+        final String contextName = file.toString().replace(webDirectory.toString(), "").replace("\\", "/");
         System.out.println("adding context " + contextName);
         final HttpContext statusContext = server.createContext(contextName);
         HttpHandler httpHandler = null;
@@ -105,7 +93,7 @@ public class HttpContextHandler implements Runnable, FileVisitor<Path> {
     }
 
     @Override
-    public FileVisitResult visitFileFailed(Path file, IOException exc) throws IOException {
+    public FileVisitResult visitFileFailed(Path file, IOException exc) {
         return FileVisitResult.CONTINUE;
     }
 }
