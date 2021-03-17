@@ -1,6 +1,7 @@
 package dev.donhk.http.handlers;
 
 import com.sun.net.httpserver.HttpExchange;
+import dev.donhk.utils.LayoutManager;
 import dev.donhk.utils.Utils;
 
 import java.io.IOException;
@@ -10,14 +11,12 @@ import java.nio.file.Path;
 public class DirectoryContextHandler extends AbstractHandler {
 
     private final Path currentDirectory;
-    private final String currentDirectoryStr;
     private final Path webDirectory;
     private final String newLineHtml = "<br>";
 
     public DirectoryContextHandler(Path webDirectory, Path currentDirectory) {
         this.webDirectory = webDirectory;
         this.currentDirectory = currentDirectory;
-        this.currentDirectoryStr = currentDirectory.toString();
         System.out.println("cd [" + currentDirectory.toString() + "]");
     }
 
@@ -29,8 +28,6 @@ public class DirectoryContextHandler extends AbstractHandler {
         }
         final StringBuilder directories = new StringBuilder();
         final StringBuilder files = new StringBuilder();
-        final String layout = Utils.resource2txt("layout.html");
-
         Files.list(currentDirectory).sorted().forEach(element -> {
             try {
                 if (Files.isSymbolicLink(element)) {
@@ -53,7 +50,7 @@ public class DirectoryContextHandler extends AbstractHandler {
             }
         });
         directories.append(files);
-        final String responseMessage = layout.replace("{{listOfFiles}}", directories.toString()) + "\n";
+        final String responseMessage = LayoutManager.getInstance().getLayout().replace("{{listOfFiles}}", directories.toString()) + "\n";
         sendHtmlResponse(responseMessage.getBytes(), exchange);
     }
 
