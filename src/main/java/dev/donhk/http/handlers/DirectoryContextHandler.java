@@ -29,26 +29,23 @@ public class DirectoryContextHandler extends AbstractHandler {
         }
         final StringBuilder directories = new StringBuilder();
         final StringBuilder files = new StringBuilder();
-
-        final String fileIcon = Utils.resource2txt("file.svg");
-        final String folderIcon = Utils.resource2txt("directory.svg");
-        String layout = Utils.resource2txt("layout.html");
+        final String layout = Utils.resource2txt("layout.html");
 
         Files.list(currentDirectory).sorted().forEach(element -> {
             try {
                 if (Files.isSymbolicLink(element)) {
                     if (Files.isDirectory(element)) {
-                        directories.append(folderIcon).append(wrap(element)).append("@ ").append(Files.size(element)).append(" bytes").append(newLineHtml);
+                        directories.append(folderIcon()).append(wrap(element)).append("@ ").append(Files.size(element)).append(" bytes").append(newLineHtml);
                     }
                     if (Files.isRegularFile(element)) {
-                        files.append(fileIcon).append(wrap(element)).append("@ ").append(Files.size(element)).append(" bytes").append(newLineHtml);
+                        files.append(fileIcon()).append(wrap(element)).append("@ ").append(Files.size(element)).append(" bytes").append(newLineHtml);
                     }
                 } else {
                     if (Files.isDirectory(element)) {
-                        directories.append(folderIcon).append(wrap(element)).append(" ").append(Files.size(element)).append(" bytes").append(newLineHtml);
+                        directories.append(folderIcon()).append(wrap(element)).append(" ").append(Files.size(element)).append(" bytes").append(newLineHtml);
                     }
                     if (Files.isRegularFile(element)) {
-                        files.append(fileIcon).append(wrap(element)).append(" ").append(Files.size(element)).append(" bytes").append(newLineHtml);
+                        files.append(fileIcon()).append(wrap(element)).append(" ").append(Files.size(element)).append(" bytes").append(newLineHtml);
                     }
                 }
             } catch (IOException io) {
@@ -66,10 +63,10 @@ public class DirectoryContextHandler extends AbstractHandler {
     }
 
     private String fileIcon() {
-        return "<div class=\"fileIcon\"></div>";
+        return "<div class=\"icon fileIcon\"></div>";
     }
 
     private String folderIcon() {
-        return "<div class=\"directoryIcon\"></div>";
+        return "<div class=\"icon folderIcon\"></div>";
     }
 }
