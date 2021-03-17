@@ -9,18 +9,20 @@ import java.nio.file.Path;
 
 public class DirectoryContextHandler extends AbstractHandler {
 
-    private final Path directory;
+    private final Path currentDirectory;
+    private final String currentDirectoryStr;
     private final Path webDirectory;
     private final String newLineHtml = "<br>";
 
-    public DirectoryContextHandler(Path webDirectory, Path directory) {
+    public DirectoryContextHandler(Path webDirectory, Path currentDirectory) {
         this.webDirectory = webDirectory;
-        this.directory = directory;
+        this.currentDirectory = currentDirectory;
+        this.currentDirectoryStr = currentDirectory.toString();
+        System.out.println("cd [" + currentDirectory.toString() + "]");
     }
 
     @Override
     public void handle(HttpExchange exchange) throws IOException {
-        System.out.println("Resolving request [dir]");
         if (!exchange.getRequestMethod().equalsIgnoreCase("get")) {
             exchange.close();
             return;
@@ -32,7 +34,7 @@ public class DirectoryContextHandler extends AbstractHandler {
         final String folderIcon = Utils.resource2txt("directory.svg");
         String layout = Utils.resource2txt("layout.html");
 
-        Files.list(directory).sorted().forEach(element -> {
+        Files.list(currentDirectory).sorted().forEach(element -> {
             try {
                 if (Files.isSymbolicLink(element)) {
                     if (Files.isDirectory(element)) {
@@ -59,8 +61,8 @@ public class DirectoryContextHandler extends AbstractHandler {
     }
 
     private String wrap(Path element) {
-        final String name = element.toString().replace(webDirectory.toString(), "").replace("\\", "/");
-        return "<a href=\"" + name + "\">" + "../" + element.getFileName() + "</a>";
+        final String href = Utils.urlEncode(element.toString().replace(webDirectory.toString(), "").replace("\\", "/"));
+        return "<a href=\"" + href + "\">" + "../" + element.getFileName() + "</a>";
     }
 
     private String fileIcon() {

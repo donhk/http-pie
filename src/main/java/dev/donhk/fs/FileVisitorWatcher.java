@@ -5,6 +5,7 @@ import com.sun.net.httpserver.HttpHandler;
 import dev.donhk.http.HttpContextHandler;
 import dev.donhk.http.handlers.DirectoryContextHandler;
 import dev.donhk.http.handlers.FileContextHandler;
+import dev.donhk.utils.Utils;
 
 import java.io.IOException;
 import java.nio.file.FileVisitResult;
@@ -12,7 +13,6 @@ import java.nio.file.FileVisitor;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.attribute.BasicFileAttributes;
-import java.util.TreeSet;
 
 public class FileVisitorWatcher implements FileVisitor<Path> {
 
@@ -23,17 +23,17 @@ public class FileVisitorWatcher implements FileVisitor<Path> {
     }
 
     @Override
-    public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) {
-        final String contextName = dir.toString().replace(server.getWebDirectory().toString(), "").replace("\\", "/");
+    public FileVisitResult preVisitDirectory(Path currentDirectory, BasicFileAttributes attrs) {
+        final String contextName = Utils.urlEncode(currentDirectory.toString().replace(server.getWebDirectory().toString(), "").replace("\\", "/"));
         final String context;
         if (contextName.length() == 0) {
             context = "/";
         } else {
             context = contextName;
         }
-        System.out.println("adding dir context " + context);
+        System.out.println("adding dir context [" + context + "] dir [" + currentDirectory.toString() + "]");
         final HttpContext statusContext = server.getServer().createContext(context);
-        HttpHandler httpHandler = new DirectoryContextHandler(server.getWebDirectory(), dir);
+        final HttpHandler httpHandler = new DirectoryContextHandler(server.getWebDirectory(), currentDirectory);
         statusContext.setHandler(httpHandler);
         return FileVisitResult.CONTINUE;
     }
@@ -45,8 +45,8 @@ public class FileVisitorWatcher implements FileVisitor<Path> {
 
     @Override
     public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) {
-        final String contextName = file.toString().replace(server.getWebDirectory().toString(), "").replace("\\", "/");
-        System.out.println("adding context " + contextName);
+        final String contextName = Utils.urlEncode(file.toString().replace(server.getWebDirectory().toString(), "").replace("\\", "/"));
+        System.out.println("adding file context " + contextName);
         final HttpContext statusContext = server.getServer().createContext(contextName);
         HttpHandler httpHandler = null;
         if (Files.isRegularFile(file)) {

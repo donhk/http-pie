@@ -1,9 +1,6 @@
 package dev.donhk.utils;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.io.*;
 
 public class Utils {
     private Utils() {
@@ -23,5 +20,36 @@ public class Utils {
             }
             return sb.toString();
         }
+    }
+
+    public static String urlEncode(String originalString) {
+        return percentEncode(originalString);
+    }
+
+    private static String percentEncode(String encodeMe) {
+        if (encodeMe == null) {
+            return "";
+        }
+        String encoded = encodeMe.replace("%", "-");
+        encoded = encoded.replace(" ", "-");
+        encoded = encoded.replace("!", "-");
+        encoded = encoded.replace("#", "-");
+        encoded = encoded.replace("$", "-");
+        encoded = encoded.replace("&", "-");
+        encoded = encoded.replace("'", "-");
+        encoded = encoded.replace("(", "-");
+        encoded = encoded.replace(")", "-");
+        encoded = encoded.replace("*", "-");
+        encoded = encoded.replace("+", "-");
+        encoded = encoded.replace(",", "-");
+        //encoded = encoded.replace("/", "%2F");
+        encoded = encoded.replace(":", "-");
+        encoded = encoded.replace(";", "-");
+        encoded = encoded.replace("=", "-");
+        encoded = encoded.replace("?", "-");
+        encoded = encoded.replace("@", "-");
+        encoded = encoded.replace("[", "-");
+        encoded = encoded.replace("]", "-");
+        return encoded;
     }
 }
