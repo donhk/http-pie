@@ -1,7 +1,7 @@
 package dev.donhk.http.handlers;
 
 import com.sun.net.httpserver.HttpExchange;
-import utils.Utils;
+import dev.donhk.utils.Utils;
 
 import java.io.IOException;
 import java.nio.file.Files;

@@ -1,24 +1,23 @@
 package dev.donhk.fs;
 
-import dev.donhk.http.HttpContextHandler;
-
 import java.io.IOException;
 import java.nio.file.*;
 
 import static java.nio.file.StandardWatchEventKinds.*;
 
-public class FSWatcher implements Runnable {
+public class FsWatcher implements Runnable {
 
     private final Path hotDir;
-    private final HttpContextHandler server;
+    private final FsScanner scanner;
 
-    public FSWatcher(Path hotDir, HttpContextHandler server) {
+    public FsWatcher(Path hotDir, FsScanner scanner) {
         this.hotDir = hotDir;
-        this.server = server;
+        this.scanner = scanner;
     }
 
     @Override
     public void run() {
+        scanner.update();
         try {
             final WatchService watchService = FileSystems.getDefault().newWatchService();
             hotDir.register(watchService, ENTRY_CREATE, ENTRY_MODIFY, ENTRY_DELETE);
@@ -32,7 +31,7 @@ public class FSWatcher implements Runnable {
                 }
                 for (WatchEvent<?> event : key.pollEvents()) {
                     System.out.println("Event kind : " + event.kind() + " - File : " + event.context());
-                    server.updateContext();
+                    scanner.update();
                 }
                 poll = key.reset();
             }

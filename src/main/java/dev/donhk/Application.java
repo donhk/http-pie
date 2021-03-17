@@ -1,6 +1,8 @@
 package dev.donhk;
 
-import dev.donhk.fs.FSWatcher;
+import dev.donhk.fs.FsWatcher;
+import dev.donhk.fs.FileVisitorWatcher;
+import dev.donhk.fs.FsScanner;
 import dev.donhk.http.HttpContextHandler;
 
 import java.nio.file.Files;
@@ -34,9 +36,12 @@ public class Application {
             throw new IllegalStateException("Cannot read directory " + WEB_CONTENT);
         }
         final HttpContextHandler server = new HttpContextHandler(WEB_CONTENT, SERVER_PORT, executorService);
-        final FSWatcher fsWatcher = new FSWatcher(WEB_CONTENT, server);
-        executorService.submit(fsWatcher);
         executorService.submit(server);
+        server.waitUntilStart();
+        final FileVisitorWatcher fileVisitor = new FileVisitorWatcher(server);
+        final FsScanner fsScanner = new FsScanner(fileVisitor);
+        final FsWatcher fsWatcher = new FsWatcher(WEB_CONTENT, fsScanner);
+        executorService.submit(fsWatcher);
     }
 
     public static void main(String[] args) {

@@ -1,4 +1,4 @@
-package utils;
+package dev.donhk.utils;
 
 import java.io.BufferedReader;
 import java.io.IOException;
