@@ -13,10 +13,10 @@ public abstract class AbstractHandler implements HttpHandler {
         addCommonHeaders(exchange);
         exchange.getResponseHeaders().put("Content-Type", Collections.singletonList("text/html; charset=utf-8"));
         exchange.sendResponseHeaders(200, responseBytes.length);
-        OutputStream outputStream = exchange.getResponseBody();
-        outputStream.write(responseBytes);
-        outputStream.flush();
-        outputStream.close();
+        try (OutputStream outputStream = exchange.getResponseBody()) {
+            outputStream.write(responseBytes);
+            outputStream.flush();
+        }
     }
 
     void addCommonHeaders(HttpExchange exchange) {

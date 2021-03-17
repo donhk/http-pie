@@ -1,6 +1,7 @@
 package dev.donhk.http;
 
 import com.sun.net.httpserver.HttpServer;
+import dev.donhk.http.handlers.StatusHandler;
 
 import java.io.IOException;
 import java.net.InetAddress;
@@ -33,6 +34,8 @@ public class HttpContextHandler implements Runnable {
         } catch (IOException e) {
             throw new IllegalStateException(e.getMessage());
         }
+        //add state handlers
+        this.server.createContext("/ping", new StatusHandler());
         server.setExecutor(executorService);
         server.start();
         alive = true;
