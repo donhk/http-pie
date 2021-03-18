@@ -1,7 +1,6 @@
 package dev.donhk.fs;
 
 import com.sun.net.httpserver.HttpServer;
-import dev.donhk.http.handlers.DirectoryContextHandler;
 import dev.donhk.http.handlers.FileContextHandler;
 import dev.donhk.utils.Utils;
 
@@ -38,25 +37,38 @@ public class FsScanner {
         }
     }
 
-    public void create(Path path) {
-        final Path actualPath = Paths.get(webRoot.toString(), path.toString());
-        final String contextName = Utils.generateContextName(actualPath, webRoot.toString());
+    public void create(Path actualPath) {
+        final String contextName = "/" + Utils.generateContextName(actualPath, webRoot.toString());
         if (Files.isDirectory(actualPath)) {
             System.out.println("creating dir context " + contextName);
-            server.createContext(contextName, new DirectoryContextHandler(webRoot, actualPath));
+            folderChange(actualPath);
         } else {
             System.out.println("creating file context " + contextName);
             server.createContext(contextName, new FileContextHandler(actualPath));
         }
     }
 
-    public void delete(Path path) {
-        final String contextName = "/" + Utils.generateContextName(path, webRoot.toString());
+    public void delete(Path actualPath) {
+        final String contextName = "/" + Utils.generateContextName(actualPath, webRoot.toString());
         System.out.println("removing " + contextName);
-        server.removeContext(contextName);
+        if (Files.isDirectory(actualPath)) {
+            System.out.println("removing subtree " + actualPath.toString());
+            scanFolder(actualPath, pruner);
+        } else {
+            server.removeContext(contextName);
+        }
     }
 
-    public void folderChange(Path dir) {
-        scanFolder(dir, pruner);
+    public void folderChange(Path directory) {
+        System.out.println("removing subtree " + directory.toString());
+        scanFolder(directory, pruner);
+        System.out.println("prune done");
+        System.out.println("reindexing subtree " + directory.toString());
+        scanFolder(directory, visitorWatcher);
+        System.out.println("reindex done");
+    }
+
+    public Path getWebRoot() {
+        return webRoot;
     }
 }

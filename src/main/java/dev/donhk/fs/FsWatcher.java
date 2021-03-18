@@ -31,7 +31,8 @@ public class FsWatcher implements Runnable {
                 }
                 for (WatchEvent<?> event : key.pollEvents()) {
                     final Path path = (Path) event.context();
-                    System.out.println("Event kind : " + event.kind() + " - File : " + path);
+                    final Path actualPath = Paths.get(scanner.getWebRoot().toString(), path.toString());
+                    System.out.println("Event kind : " + event.kind() + " - File : " + actualPath.toString());
                     switch (event.kind().name()) {
                         case "ENTRY_DELETE":
                             scanner.delete(path);
@@ -40,7 +41,7 @@ public class FsWatcher implements Runnable {
                             scanner.create(path);
                             break;
                         case "ENTRY_MODIFY":
-                            //scanner.folderChange(path);
+                            scanner.folderChange(path);
                             break;
                     }
                 }
