@@ -35,13 +35,13 @@ public class FsWatcher implements Runnable {
                     System.out.println("Event kind : " + event.kind() + " - File : " + actualPath.toString());
                     switch (event.kind().name()) {
                         case "ENTRY_DELETE":
-                            scanner.delete(path);
+                            scanner.delete(actualPath);
                             break;
                         case "ENTRY_CREATE":
-                            scanner.create(path);
+                            scanner.create(actualPath);
                             break;
                         case "ENTRY_MODIFY":
-                            scanner.folderChange(path);
+                            scanner.folderChange(actualPath);
                             break;
                     }
                 }

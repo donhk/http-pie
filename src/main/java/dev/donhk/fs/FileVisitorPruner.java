@@ -25,18 +25,21 @@ public class FileVisitorPruner implements FileVisitor<Path> {
     @Override
     public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
         final String context = Utils.generateContextName(file, server.getWebDirectory().toString());
+        System.out.println("removing file [" + file.toString() + "] context [" + context + "]");
         server.getServer().removeContext(context);
         return FileVisitResult.CONTINUE;
     }
 
     @Override
     public FileVisitResult visitFileFailed(Path file, IOException exc) throws IOException {
+        System.out.println(">>failed visiting " + file.toString());
         return FileVisitResult.CONTINUE;
     }
 
     @Override
     public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException {
         final String context = Utils.generateContextName(dir, server.getWebDirectory().toString());
+        System.out.println("Pruning dir [" + dir.toString() + "] context [" + context + "]");
         server.getServer().removeContext(context);
         return FileVisitResult.CONTINUE;
     }

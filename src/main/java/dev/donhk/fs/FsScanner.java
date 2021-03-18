@@ -30,6 +30,7 @@ public class FsScanner {
     }
 
     private void scanFolder(Path folder, FileVisitor<Path> visitor) {
+        System.out.println("scanning folder " + folder.toString());
         try {
             Files.walkFileTree(folder, new TreeSet<>(), 100, visitor);
         } catch (IOException e) {
@@ -38,10 +39,10 @@ public class FsScanner {
     }
 
     public void create(Path actualPath) {
-        final String contextName = "/" + Utils.generateContextName(actualPath, webRoot.toString());
+        final String contextName = Utils.generateContextName(actualPath, webRoot.toString());
         if (Files.isDirectory(actualPath)) {
             System.out.println("creating dir context " + contextName);
-            folderChange(actualPath);
+            scanFolder(actualPath, visitorWatcher);
         } else {
             System.out.println("creating file context " + contextName);
             server.createContext(contextName, new FileContextHandler(actualPath));
@@ -49,7 +50,7 @@ public class FsScanner {
     }
 
     public void delete(Path actualPath) {
-        final String contextName = "/" + Utils.generateContextName(actualPath, webRoot.toString());
+        final String contextName = Utils.generateContextName(actualPath, webRoot.toString());
         System.out.println("removing " + contextName);
         if (Files.isDirectory(actualPath)) {
             System.out.println("removing subtree " + actualPath.toString());
@@ -60,9 +61,9 @@ public class FsScanner {
     }
 
     public void folderChange(Path directory) {
-        System.out.println("removing subtree " + directory.toString());
-        scanFolder(directory, pruner);
-        System.out.println("prune done");
+        //System.out.println("removing subtree " + directory.toString());
+        //scanFolder(directory, pruner);
+        //System.out.println("prune done");
         System.out.println("reindexing subtree " + directory.toString());
         scanFolder(directory, visitorWatcher);
         System.out.println("reindex done");
