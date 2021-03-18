@@ -8,29 +8,25 @@ import java.io.IOException;
 import java.nio.file.FileVisitor;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.TreeSet;
 
 public class FsScanner {
 
     private final FileVisitorWatcher visitorWatcher;
-    private final FileVisitorPruner pruner;
     private final HttpServer server;
     private final Path webRoot;
 
     public FsScanner(FileVisitorWatcher visitorWatcher) {
         this.visitorWatcher = visitorWatcher;
-        this.pruner = new FileVisitorPruner(visitorWatcher.getServer());
-        this.server = visitorWatcher.getServer().getServer();
-        this.webRoot = visitorWatcher.getServer().getWebDirectory();
+        this.server = visitorWatcher.getContextHandler().getServer();
+        this.webRoot = visitorWatcher.getContextHandler().getWebDirectory();
     }
 
     public void update() {
-        scanFolder(visitorWatcher.getServer().getWebDirectory(), visitorWatcher);
+        scanFolder(visitorWatcher.getContextHandler().getWebDirectory(), visitorWatcher);
     }
 
     private void scanFolder(Path folder, FileVisitor<Path> visitor) {
-        System.out.println("scanning folder " + folder.toString());
         try {
             Files.walkFileTree(folder, new TreeSet<>(), 100, visitor);
         } catch (IOException e) {
@@ -53,17 +49,17 @@ public class FsScanner {
         final String contextName = Utils.generateContextName(actualPath, webRoot.toString());
         System.out.println("removing " + contextName);
         if (Files.isDirectory(actualPath)) {
-            System.out.println("removing subtree " + actualPath.toString());
-            scanFolder(actualPath, pruner);
+            System.out.println("removing " + actualPath.toString());
+            folderChange(actualPath);
         } else {
             server.removeContext(contextName);
         }
     }
 
     public void folderChange(Path directory) {
-        //System.out.println("removing subtree " + directory.toString());
-        //scanFolder(directory, pruner);
-        //System.out.println("prune done");
+        //TODO we need to keep track of the context that we want to remove outside
+        // outside of the code because the old context causes the code hang
+        System.out.println("removing directories context" + directory.toString());
         System.out.println("reindexing subtree " + directory.toString());
         scanFolder(directory, visitorWatcher);
         System.out.println("reindex done");

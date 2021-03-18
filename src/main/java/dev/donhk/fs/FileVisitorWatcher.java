@@ -68,7 +68,7 @@ public class FileVisitorWatcher implements FileVisitor<Path> {
         return FileVisitResult.CONTINUE;
     }
 
-    public HttpContextHandler getServer() {
+    public HttpContextHandler getContextHandler() {
         return server;
     }
 }
