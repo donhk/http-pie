@@ -13,34 +13,34 @@ import java.util.concurrent.Executors;
 
 public class Application {
 
-    private final int SERVER_PORT;
-    private final Path WEB_CONTENT;
+    private final int serverPort;
+    private final Path webContent;
     private final ExecutorService executorService = Executors.newCachedThreadPool();
 
     public Application(String[] args) {
         switch (args.length) {
             default:
             case 1:
-                SERVER_PORT = 9001;
-                WEB_CONTENT = Paths.get(args[0]);
+                serverPort = 9001;
+                webContent = Paths.get(args[0]);
                 break;
             case 2:
-                SERVER_PORT = Integer.parseInt(args[0]);
-                WEB_CONTENT = Paths.get(args[1]);
+                serverPort = Integer.parseInt(args[0]);
+                webContent = Paths.get(args[1]);
                 break;
         }
     }
 
     public void startTheParty() {
-        if (!Files.exists(WEB_CONTENT)) {
-            throw new IllegalStateException("Cannot read directory " + WEB_CONTENT);
+        if (!Files.exists(webContent)) {
+            throw new IllegalStateException("Cannot read directory " + webContent);
         }
-        final HttpContextHandler server = new HttpContextHandler(WEB_CONTENT, SERVER_PORT, executorService);
+        final HttpContextHandler server = new HttpContextHandler(webContent, serverPort, executorService);
         executorService.submit(server);
         server.waitUntilStart();
         final FileVisitorWatcher fileVisitor = new FileVisitorWatcher(server);
         final FsScanner fsScanner = new FsScanner(fileVisitor);
-        final FsWatcher fsWatcher = new FsWatcher(WEB_CONTENT, fsScanner);
+        final FsWatcher fsWatcher = new FsWatcher(webContent, fsScanner);
         executorService.submit(fsWatcher);
     }
 

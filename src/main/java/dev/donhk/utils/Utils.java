@@ -1,6 +1,7 @@
 package dev.donhk.utils;
 
 import java.io.*;
+import java.nio.file.Path;
 
 public class Utils {
     private Utils() {
@@ -20,6 +21,10 @@ public class Utils {
             }
             return sb.toString();
         }
+    }
+
+    public static String generateContextName(Path file, String webBase) {
+        return Utils.urlEncode(file.toString().replace(webBase, "").replace("\\", "/"));
     }
 
     public static String urlEncode(String originalString) {

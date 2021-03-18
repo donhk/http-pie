@@ -3,6 +3,7 @@ package dev.donhk.http.handlers;
 import com.sun.net.httpserver.HttpExchange;
 
 import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Collections;
@@ -16,21 +17,42 @@ public class FileContextHandler extends AbstractHandler {
     }
 
     @Override
-    public void handle(HttpExchange exchange) throws IOException {
+    public void handle(HttpExchange exchange) {
         System.out.println("Downloading " + file.toString());
-        Path realPath;
-        if (Files.isSymbolicLink(file)) {
-            realPath = file.toRealPath();
-        } else {
-            realPath = file;
+        try {
+            Path realPath;
+            if (Files.isSymbolicLink(file)) {
+                realPath = file.toRealPath();
+            } else {
+                realPath = file;
+            }
+            downloadFile(exchange, realPath);
+        } catch (IOException e) {
+            e.printStackTrace();
         }
-        downloadFile(exchange, realPath);
     }
 
     private void downloadFile(HttpExchange exchange, Path fileToDownload) throws IOException {
         exchange.getResponseHeaders().put("Content-Transfer-Encoding", Collections.singletonList("binary"));
         addCommonHeaders(exchange);
         final long totalBytes = Files.size(fileToDownload);
+        System.out.println("file: " + fileToDownload.toString() + " " + totalBytes);
+        if (totalBytes == 0) {
+            emptyResponse(exchange);
+        } else {
+            downloadData(totalBytes, fileToDownload, exchange);
+        }
+    }
+
+    /**
+     * Download file contents
+     *
+     * @param totalBytes     bytes that will be send
+     * @param fileToDownload file to download
+     * @param exchange       HttpExchange object
+     * @throws IOException on error
+     */
+    private void downloadData(long totalBytes, Path fileToDownload, HttpExchange exchange) throws IOException {
         exchange.sendResponseHeaders(200, totalBytes);
         try (OutputStream outputStream = exchange.getResponseBody();
              InputStream is = new FileInputStream(fileToDownload.toFile())) {
@@ -48,6 +70,21 @@ public class FileContextHandler extends AbstractHandler {
                 outputStream.flush();
                 bytesLeft -= bytesRead;
             }
+        }
+    }
+
+    /**
+     * The file to download is empty
+     *
+     * @param exchange HttpExchange object
+     * @throws IOException on error
+     */
+    private void emptyResponse(HttpExchange exchange) throws IOException {
+        final byte[] empty = "\n".getBytes(StandardCharsets.UTF_8);
+        exchange.sendResponseHeaders(200, empty.length);
+        try (OutputStream outputStream = exchange.getResponseBody()) {
+            outputStream.write(empty);
+            outputStream.flush();
         }
     }
 }

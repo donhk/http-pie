@@ -24,7 +24,7 @@ public class FileVisitorWatcher implements FileVisitor<Path> {
 
     @Override
     public FileVisitResult preVisitDirectory(Path currentDirectory, BasicFileAttributes attrs) {
-        final String contextName = Utils.urlEncode(currentDirectory.toString().replace(server.getWebDirectory().toString(), "").replace("\\", "/"));
+        final String contextName =  Utils.generateContextName(currentDirectory, server.getWebDirectory().toString());
         final String context;
         if (contextName.length() == 0) {
             context = "/";
@@ -45,7 +45,7 @@ public class FileVisitorWatcher implements FileVisitor<Path> {
 
     @Override
     public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) {
-        final String contextName = Utils.urlEncode(file.toString().replace(server.getWebDirectory().toString(), "").replace("\\", "/"));
+        final String contextName = Utils.generateContextName(file, server.getWebDirectory().toString());
         System.out.println("adding file context " + contextName);
         final HttpContext statusContext = server.getServer().createContext(contextName);
         HttpHandler httpHandler = null;
