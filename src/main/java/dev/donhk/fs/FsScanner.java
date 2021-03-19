@@ -1,6 +1,7 @@
 package dev.donhk.fs;
 
 import com.sun.net.httpserver.HttpServer;
+import dev.donhk.http.handlers.DirectoryContextHandler;
 import dev.donhk.http.handlers.FileContextHandler;
 import dev.donhk.utils.Utils;
 
@@ -38,7 +39,7 @@ public class FsScanner {
         final String contextName = Utils.generateContextName(actualPath, webRoot.toString());
         if (Files.isDirectory(actualPath)) {
             System.out.println("creating dir context " + contextName);
-            scanFolder(actualPath, visitorWatcher);
+            server.createContext(contextName, new DirectoryContextHandler(webRoot, actualPath));
         } else {
             System.out.println("creating file context " + contextName);
             server.createContext(contextName, new FileContextHandler(actualPath));
@@ -47,22 +48,8 @@ public class FsScanner {
 
     public void delete(Path actualPath) {
         final String contextName = Utils.generateContextName(actualPath, webRoot.toString());
-        System.out.println("removing " + contextName);
-        if (Files.isDirectory(actualPath)) {
-            System.out.println("removing " + actualPath.toString());
-            folderChange(actualPath);
-        } else {
-            server.removeContext(contextName);
-        }
-    }
-
-    public void folderChange(Path directory) {
-        //TODO we need to keep track of the context that we want to remove outside
-        // outside of the code because the old context causes the code hang
-        System.out.println("removing directories context" + directory.toString());
-        System.out.println("reindexing subtree " + directory.toString());
-        scanFolder(directory, visitorWatcher);
-        System.out.println("reindex done");
+        System.out.println("removing context " + contextName);
+        server.removeContext(contextName);
     }
 
     public Path getWebRoot() {

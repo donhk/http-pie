@@ -1,8 +1,8 @@
 package dev.donhk;
 
-import dev.donhk.fs.FsWatcher;
 import dev.donhk.fs.FileVisitorWatcher;
 import dev.donhk.fs.FsScanner;
+import dev.donhk.fs.DirectoryWatcher;
 import dev.donhk.http.HttpContextHandler;
 
 import java.nio.file.Files;
@@ -40,8 +40,8 @@ public class Application {
         server.waitUntilStart();
         final FileVisitorWatcher fileVisitor = new FileVisitorWatcher(server);
         final FsScanner fsScanner = new FsScanner(fileVisitor);
-        final FsWatcher fsWatcher = new FsWatcher(webContent, fsScanner);
-        executorService.submit(fsWatcher);
+        final DirectoryWatcher directoryWatcher = new DirectoryWatcher(webContent, true, fsScanner);
+        executorService.submit(directoryWatcher);
     }
 
     public static void main(String[] args) {
