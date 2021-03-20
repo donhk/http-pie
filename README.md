@@ -19,4 +19,7 @@ multiple requests.
 Run the software as a daemon pointing to a NAS and put it behind of a load balancer to have a nice
 distributed download software.
 
+![Architecture](https://raw.githubusercontent.com/donhk/http-pai/main/docs/architecture.png "Architecture")
+
+
 
