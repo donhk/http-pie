@@ -1,8 +1,9 @@
 package dev.donhk;
 
-import dev.donhk.fs.FileVisitorWatcher;
+import dev.donhk.fs.apache.ApacheWatcher;
+import dev.donhk.fs.core.FileVisitorWatcher;
 import dev.donhk.fs.FsScanner;
-import dev.donhk.fs.DirectoryWatcher;
+import dev.donhk.fs.core.CoreJavaWatcher;
 import dev.donhk.http.HttpContextHandler;
 
 import java.nio.file.Files;
@@ -16,6 +17,7 @@ public class Application {
     private final int serverPort;
     private final Path webContent;
     private final ExecutorService executorService = Executors.newCachedThreadPool();
+    private final boolean apache;
 
     public Application(String[] args) {
         switch (args.length) {
@@ -23,10 +25,17 @@ public class Application {
             case 1:
                 serverPort = 9001;
                 webContent = Paths.get(args[0]);
+                apache = false;
                 break;
             case 2:
                 serverPort = Integer.parseInt(args[0]);
                 webContent = Paths.get(args[1]);
+                apache = false;
+                break;
+            case 3:
+                serverPort = Integer.parseInt(args[0]);
+                webContent = Paths.get(args[1]);
+                apache = true;
                 break;
         }
     }
@@ -40,8 +49,15 @@ public class Application {
         server.waitUntilStart();
         final FileVisitorWatcher fileVisitor = new FileVisitorWatcher(server);
         final FsScanner fsScanner = new FsScanner(fileVisitor);
-        final DirectoryWatcher directoryWatcher = new DirectoryWatcher(webContent, true, fsScanner);
-        executorService.submit(directoryWatcher);
+        final Runnable watcher;
+        if (apache) {
+            System.out.println("Apache Watcher");
+            watcher = new ApacheWatcher(webContent, fsScanner);
+        } else {
+            System.out.println("Directory Watcher");
+            watcher = new CoreJavaWatcher(webContent, true, fsScanner);
+        }
+        executorService.submit(watcher);
     }
 
     public static void main(String[] args) {

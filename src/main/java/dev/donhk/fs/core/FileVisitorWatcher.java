@@ -1,4 +1,4 @@
-package dev.donhk.fs;
+package dev.donhk.fs.core;
 
 import com.sun.net.httpserver.HttpContext;
 import com.sun.net.httpserver.HttpHandler;

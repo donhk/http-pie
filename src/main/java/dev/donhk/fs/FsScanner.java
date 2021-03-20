@@ -1,6 +1,7 @@
 package dev.donhk.fs;
 
 import com.sun.net.httpserver.HttpServer;
+import dev.donhk.fs.core.FileVisitorWatcher;
 import dev.donhk.http.handlers.DirectoryContextHandler;
 import dev.donhk.http.handlers.FileContextHandler;
 import dev.donhk.utils.Utils;

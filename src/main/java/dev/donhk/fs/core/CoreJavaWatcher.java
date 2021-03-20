@@ -1,4 +1,6 @@
-package dev.donhk.fs;
+package dev.donhk.fs.core;
+
+import dev.donhk.fs.FsScanner;
 
 import java.nio.file.*;
 
@@ -8,7 +10,7 @@ import java.nio.file.attribute.*;
 import java.io.*;
 import java.util.*;
 
-public class DirectoryWatcher implements Runnable {
+public class CoreJavaWatcher implements Runnable {
 
     private final WatchService watcher;
     private final Map<WatchKey, Path> keys;
@@ -24,7 +26,7 @@ public class DirectoryWatcher implements Runnable {
     /**
      * Creates a WatchService and registers the given directory
      */
-    public DirectoryWatcher(Path dir, boolean recursive, FsScanner scanner) {
+    public CoreJavaWatcher(Path dir, boolean recursive, FsScanner scanner) {
         this.keys = new HashMap<>();
         this.recursive = recursive;
         this.scanner = scanner;
