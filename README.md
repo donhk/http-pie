@@ -1,4 +1,4 @@
-## http-pai
+## http-pie
 
 Portable Java HTTP server for file sharing with custom network throttling and support for handling multiple requests simultaneously.
 Sometimes you just want a small server to share files over http, this works similar to SimpleHttpServer from python but supports
@@ -19,7 +19,7 @@ multiple requests.
 Run the software as a daemon pointing to a NAS and put it behind of a load balancer to have a nice
 distributed download software.
 
-![Architecture](https://raw.githubusercontent.com/donhk/http-pai/main/docs/architecture.png "Architecture")
+![Architecture](https://raw.githubusercontent.com/donhk/http-pie/main/docs/architecture.png "Architecture")
 
 
 
