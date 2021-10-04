@@ -23,8 +23,14 @@ public class Utils {
         }
     }
 
-    public static String generateContextName(Path file, String webBase) {
-        return Utils.urlEncode(file.toString().replace(webBase, "").replace("\\", "/"));
+    public static String generateContextName(Path path, String webBase) {
+        final String string = path.toString()
+                .replace(webBase, "")
+                .replace("\\", "/");
+        System.out.println("before url encode [" + path.toString() + "]");
+        final String encoded = Utils.urlEncode(string);
+        System.out.println("after url encode [" + path.toString() + "]");
+        return encoded;
     }
 
     public static String urlEncode(String originalString) {

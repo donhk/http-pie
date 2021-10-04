@@ -24,7 +24,7 @@ public class FileVisitorWatcher implements FileVisitor<Path> {
 
     @Override
     public FileVisitResult preVisitDirectory(Path currentDirectory, BasicFileAttributes attrs) {
-        final String contextName =  Utils.generateContextName(currentDirectory, server.getWebDirectory().toString());
+        final String contextName = Utils.generateContextName(currentDirectory, server.getWebDirectory().toString());
         final String context;
         if (contextName.length() == 0) {
             context = "/";
@@ -44,22 +44,32 @@ public class FileVisitorWatcher implements FileVisitor<Path> {
     }
 
     @Override
-    public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) {
-        final String contextName = Utils.generateContextName(file, server.getWebDirectory().toString());
-        System.out.println("adding file context " + contextName);
-        final HttpContext statusContext = server.getServer().createContext(contextName);
-        HttpHandler httpHandler = null;
-        if (Files.isRegularFile(file)) {
-            httpHandler = new FileContextHandler(file);
+    public FileVisitResult visitFile(Path path, BasicFileAttributes attrs) {
+        try {
+            final String resourceName = server.getWebDirectory().toString();
+            final String contextName = Utils.generateContextName(path, resourceName);
+            System.out.println("creating context [" + contextName + "]");
+            final HttpContext statusContext = server.getServer().createContext(contextName);
+            System.out.println("context created");
+            final boolean regularFile = Files.isRegularFile(path);
+            final boolean directory = Files.isDirectory(path);
+
+            HttpHandler httpHandler = null;
+            System.out.println("regularFile [" + regularFile + "] directory [" + directory + "]");
+            if (regularFile) {
+                httpHandler = new FileContextHandler(path);
+            }
+            if (directory) {
+                httpHandler = new DirectoryContextHandler(server.getWebDirectory(), path);
+            }
+            if (httpHandler == null) {
+                server.getServer().removeContext(path.toString());
+                return FileVisitResult.CONTINUE;
+            }
+            statusContext.setHandler(httpHandler);
+        } catch (Exception e) {
+            e.printStackTrace();
         }
-        if (Files.isDirectory(file)) {
-            httpHandler = new DirectoryContextHandler(server.getWebDirectory(), file);
-        }
-        if (httpHandler == null) {
-            server.getServer().removeContext(file.toString());
-            return FileVisitResult.CONTINUE;
-        }
-        statusContext.setHandler(httpHandler);
         return FileVisitResult.CONTINUE;
     }
 

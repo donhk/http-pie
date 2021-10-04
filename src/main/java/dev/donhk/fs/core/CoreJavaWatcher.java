@@ -33,6 +33,11 @@ public class CoreJavaWatcher implements Runnable {
 
         try {
             this.watcher = FileSystems.getDefault().newWatchService();
+        } catch (IOException io) {
+            throw new IllegalStateException(io.getMessage());
+        }
+
+        try {
             if (recursive) {
                 System.out.format("Scanning %s ...\n", dir);
                 registerAll(dir);
@@ -41,7 +46,7 @@ public class CoreJavaWatcher implements Runnable {
                 register(dir);
             }
         } catch (IOException io) {
-            throw new IllegalStateException(io.getMessage());
+            io.printStackTrace();
         }
 
         // enable trace after initial registration
@@ -74,9 +79,12 @@ public class CoreJavaWatcher implements Runnable {
         // register directory and sub-directories
         Files.walkFileTree(start, new SimpleFileVisitor<>() {
             @Override
-            public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs)
-                    throws IOException {
-                register(dir);
+            public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) {
+                try {
+                    register(dir);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
                 return FileVisitResult.CONTINUE;
             }
         });
